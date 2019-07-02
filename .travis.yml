@@ -1,22 +1,30 @@
 language: bash
 
 os:
-  - osx
+  - linux
 
-osx_image: xcode9.4
+services:
+  - docker
 
-matrix:
-    include:
-    - env: ARCH=--build-all-x86
-    - env: ARCH=--build-all-x64
+branches:
+  only:
+    - master
 
 script:
-    - bash ./macos-build.sh $ARCH
+  - docker pull devkitpro/devkita64:latest
+  - |
+    docker run \
+      -t \
+      -v $(pwd):/repo \
+      devkitpro/devkita64:latest \
+      /bin/bash -c " \
+        cd /repo \
+        && make"
 
 deploy:
   provider: releases
   api_key: "$GITHUB_TOKEN"
-  file: "build/devilutionX.dmg"
+  file: "output/release/diablo-nx.nro"
   skip_cleanup: true
   on:
     tags: true
